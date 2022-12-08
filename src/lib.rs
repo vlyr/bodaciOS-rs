@@ -4,8 +4,8 @@
 use core::fmt::Write;
 use core::panic::PanicInfo;
 
-pub mod vga;
-use vga::Color;
+pub mod bodaci_core;
+use bodaci_core::vga::{self, Color};
 
 #[panic_handler]
 fn panic(_i: &PanicInfo) -> ! {
@@ -14,11 +14,14 @@ fn panic(_i: &PanicInfo) -> ! {
 
 #[no_mangle]
 unsafe extern "C" fn kmain(multiboot_magic: u64, multiboot_addr: u64) -> ! {
-    let mut vga_pos = vga::Position::default();
+    vga::write("Hello, welcome to BodaciOS\n\n");
 
-    vga::write("Hello, welcome to BodaciOS", &mut vga_pos);
-    vga::write_colored("hey", (Color::Yellow, Color::Black), &mut vga_pos);
-    vga::write_fmt(format_args!("| {}", multiboot_addr), &mut vga_pos).unwrap();
+    vga::write_colored(
+        "Here's a test for colored text.\n",
+        (Color::Yellow, Color::Black),
+    );
+
+    println!("Hey {:#?}", multiboot_magic);
 
     loop {}
 }
