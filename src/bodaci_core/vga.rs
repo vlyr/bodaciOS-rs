@@ -18,7 +18,6 @@ pub struct Formatter {
 
 impl fmt::Write for Formatter {
     fn write_str(&mut self, data: &str) -> fmt::Result {
-        let pos = current_position_mut();
         write(data);
         Ok(())
     }
