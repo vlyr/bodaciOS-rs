@@ -18,6 +18,7 @@ bits 32
         call check_cpuid
         call check_long_mode
 
+
         call set_up_paging
         call enable_paging
 
@@ -114,9 +115,6 @@ bits 32
         ret
 
     enable_paging:
-        mov dword [0xb8000], 0x4f524f45
-        mov dword [0xb8004], 0x4f3a4f52
-        mov dword [0xb8008], 0x4f204f20
         mov eax, p3_table
         mov cr3, eax
 
@@ -139,9 +137,7 @@ bits 32
         mov dword [0xb8000], 0x4f524f45
         mov dword [0xb8004], 0x4f3a4f52
         mov dword [0xb8008], 0x4f204f20
-        mov dword [0xb800a], 0x4f204f20
-        mov dword [0xb800d], 0x4f204f20
-        mov byte  [0xb8005], al
+        mov byte  [0xb800a], al
         hlt
 
 section .bss
