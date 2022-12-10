@@ -8,11 +8,12 @@ use core::panic::PanicInfo;
 pub mod bodaci_core;
 use bodaci_core::{
     multiboot::{Tag, TagIterator},
-    vga::{self, Color},
+    vga,
 };
 
 #[panic_handler]
-fn panic(_i: &PanicInfo) -> ! {
+fn panic(i: &PanicInfo) -> ! {
+    println!("{}", i);
     loop {}
 }
 
@@ -21,10 +22,9 @@ unsafe extern "C" fn kmain(_multiboot_magic: u64, multiboot_addr: u64) -> ! {
     let tags = TagIterator::new(multiboot_addr + 8 as u64).unwrap();
 
     tags.for_each(|t| match t {
-        Tag::Unknown => (),
-        tag => {
-            println!("Data: {:#?}", tag);
-        }
+        Tag::BasicMemoryInfo(d) => println!("{:#?}", d),
+        Tag::CommandLine(mut d) => {}
+        _ => (),
     });
 
     loop {}

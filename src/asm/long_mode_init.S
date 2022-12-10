@@ -14,7 +14,6 @@ long_mode_start:
     mov fs, ax
     mov gs, ax
 
-    ; Pass a pointer to the start of the kernel as the third argument to `kmain()`.
     mov edx, kernel_start
 
     extern kmain
