@@ -5,11 +5,13 @@ pub const HEIGHT: u16 = 25;
 
 pub const BUFFER_PTR: *mut u16 = 0xb8000 as *mut _;
 
-pub static mut POSITION: Position = Position::new();
+static mut POSITION: Position = Position::new();
 
-/// (Foreground, Background)
+// (Foreground, Background)
 pub type ColorPair = (Color, Color);
 pub const DEFAULT_COLOR: ColorPair = (Color::White, Color::Black);
+
+static mut CURRENT_COLOR: ColorPair = DEFAULT_COLOR;
 
 #[derive(Debug, Clone)]
 pub struct Formatter {
@@ -46,9 +48,9 @@ impl Position {
 }
 
 #[repr(u8)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub enum Color {
-    Black = 0x0,
+    Black = 0x00,
     Blue = 0x01,
     Green = 0x02,
     Cyan = 0x03,
@@ -66,10 +68,21 @@ pub enum Color {
     White = 0x0f,
 }
 
-pub fn write_byte(data: char, color: &ColorPair) {
+impl fmt::Display for Color {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let byte = *self as u8 + 16;
+        write!(f, "{}", byte as char)
+    }
+}
+
+pub fn write_byte(data: char) {
     let pos = current_position_mut();
+    let color = current_color_mut();
 
     match data {
+        c @ '\x10'..'\x20' => {
+            color.0 = unsafe { ((&(c as u8 - 16) as *const u8) as *const Color).read() };
+        }
         '\n' => newline(),
         _ => {
             unsafe { *BUFFER_PTR.offset(pos.offset()) = entry_to_bytes(data, color) };
@@ -85,23 +98,13 @@ where
     data.as_ref()
         .as_bytes()
         .iter()
-        .for_each(|byte| write_byte(*byte as char, &DEFAULT_COLOR));
+        .for_each(|byte| write_byte(*byte as char));
 }
 
 pub fn _write_fmt(data: fmt::Arguments) {
     let pos = current_position_mut();
     let mut formatter = Formatter { pos: pos.clone() };
     fmt::write(&mut formatter, data).unwrap()
-}
-
-pub fn write_colored<T>(data: T, color: ColorPair)
-where
-    T: AsRef<str>,
-{
-    data.as_ref()
-        .as_bytes()
-        .iter()
-        .for_each(|byte| write_byte(*byte as char, &color));
 }
 
 pub fn newline() {
@@ -129,6 +132,16 @@ pub fn current_position() -> &'static Position {
 #[inline]
 pub fn current_position_mut() -> &'static mut Position {
     unsafe { &mut POSITION }
+}
+
+#[inline]
+pub fn current_color() -> &'static ColorPair {
+    unsafe { &CURRENT_COLOR }
+}
+
+#[inline]
+pub fn current_color_mut() -> &'static mut ColorPair {
+    unsafe { &mut CURRENT_COLOR }
 }
 
 #[inline]

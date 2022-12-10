@@ -75,7 +75,7 @@ pub mod tags {
     }
 
     impl CommandLineTag {
-        pub fn s(&self) -> Option<&str> {
+        pub fn string(&self) -> Option<&str> {
             let str_len = self.size as usize - mem::size_of::<CommandLineTag>() + 1;
             let data = unsafe { slice::from_raw_parts((&self.string) as *const u8, str_len) };
 
