@@ -1,1 +1,3 @@
-- [ ] Finish build script and file structure
+- [ ] VGA color interface
+
+- [x] Finish build script and file structure
